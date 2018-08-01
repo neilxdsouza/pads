@@ -97,54 +97,83 @@ struct SegmentTree {
 		constructSegmentTree(arr, 0, arr.size()-1, 0);
 	}
 
-	// int get_value(int seg_tree_index, int lo, int hi, int nest_level)
-	// {
-	// 	string fn_name = __PRETTY_FUNCTION__ ;
-	// 	for (int i = 0; i < nest_level; ++i) {
-	// 		cout << "  ";
-	// 	}
-	// 	cout << "ENTER " << fn_name
-	// 		<< " seg_tree_index: " << seg_tree_index
-	// 		<< " lo: " << lo
-	// 		<< " hi: " << hi
-	// 		<< " nest_level: " << nest_level
-	// 		<< endl;
-	// 	if (lo == seg_tree_pointer[seg_tree_index]->left &&
-	// 		hi == seg_tree_pointer[seg_tree_index]->right) {
-	// 		for (int i = 0; i < nest_level; ++i) {
-	// 			cout << "  ";
-	// 		}
-	// 		cout << "EXIT " << fn_name
-	// 			<< " seg_tree_index: " << seg_tree_index
-	// 			<< " lo: " << lo
-	// 			<< " hi: " << hi
-	// 			<< " nest_level: " << nest_level
-	// 			<< endl;
-	// 		return seg_tree_pointer[seg_tree_index]->value;
-	// 	}
-	// 	long mid = (lo + hi) / 2;
-	// 	SegmentTreeNode * left = seg_tree_pointer[2*seg_tree_index+1];
-	// 	if (lo > left->left && lo < left->right) {
-	// 	int val1 = get_value(seg_tree_index * 2 + 1, lo, mid, nest_level + 1);
-	// 	SegmentTreeNode * right = seg_tree_pointer[2*seg_tree_index+2];
-	// 	int val2 = get_value(seg_tree_index * 2 + 2, mid+1, hi, nest_level + 1);
-	// 	for (int i = 0; i < nest_level; ++i) {
-	// 		cout << "  ";
-	// 	}
-	// 	cout << "EXIT " << fn_name
-	// 		<< " seg_tree_index: " << seg_tree_index
-	// 		<< " lo: " << lo
-	// 		<< " hi: " << hi
-	// 		<< " nest_level: " << nest_level
-	// 		<< endl;
-	// 	return val1 + val2;
+	int get_value(int seg_tree_index, int lo, int hi, int nest_level)
+	{
+		string fn_name = __PRETTY_FUNCTION__ ;
+		for (int i = 0; i < nest_level; ++i) {
+			cout << "  ";
+		}
+		cout << "ENTER " << fn_name
+			<< " seg_tree_index: " << seg_tree_index
+			<< " lo: " << lo
+			<< " hi: " << hi
+			<< " nest_level: " << nest_level
+			<< endl;
+		if (lo == seg_tree_pointer[seg_tree_index]->left &&
+			hi == seg_tree_pointer[seg_tree_index]->right) {
+			for (int i = 0; i < nest_level; ++i) {
+				cout << "  ";
+			}
+			cout << "EXIT " << fn_name
+				<< " seg_tree_index: " << seg_tree_index
+				<< " lo: " << lo
+				<< " hi: " << hi
+				<< " nest_level: " << nest_level
+				<< endl;
+			return seg_tree_pointer[seg_tree_index]->value;
+		}
+		long mid = (lo + hi) / 2;
+		SegmentTreeNode * left =
+			seg_tree_pointer[2 * seg_tree_index + 1];
+		cout << "left - range : [" << 
+			left->left << " - " << left->right << "]" << endl;
+		// 0 - 7 => [0 - 3] [4 - 7]
+		// 2 - 3
+		if (lo >= left->left && hi <= left->right) {
+			cout << "INFO " << fn_name << " case : entirely contained in left - recursing " << endl;
+			int val1 = get_value(seg_tree_index * 2 + 1, lo, hi, nest_level + 1);
+			return val1;
+		}
+		SegmentTreeNode * right = seg_tree_pointer[2*seg_tree_index+2];
+		cout << "right - range : [" << 
+			right->left << " - " << right->right << "]" << endl;
+		if (lo >= right->left && hi <= right->right) {
+			// entirely contained in right
+			cout << "INFO " << fn_name << " case : entirely contained in right - recursing " << endl;
+			int val2 = get_value(seg_tree_index * 2 + 2, lo, hi, nest_level + 1);
+			return val2;
+		}
+		// partially in left and the rest in right
+		cout << "searching for range [ "
+			<< lo << " - " << left->right << "]"
+			<< " in left " << left->left << " - " << left->right
+			<< " AND " << endl;
+		int val1 = get_value(seg_tree_index * 2 + 1,
+				lo, left->right, nest_level + 1);
+		cout << "searching for range [ "
+			<< left->right + 1 << " - " << hi << "]"
+			<< " in right " << right->left << " - " << right->right
+			<< endl;
+		int val2 = get_value(seg_tree_index * 2 + 2,
+				left->right + 1, hi, nest_level + 1);
 
-	// }
+		for (int i = 0; i < nest_level; ++i) {
+			cout << "  ";
+		}
+		cout << "EXIT " << fn_name
+			<< " seg_tree_index: " << seg_tree_index
+			<< " lo: " << lo
+			<< " hi: " << hi
+			<< " nest_level: " << nest_level
+			<< endl;
+		return val1 + val2;
 
-	// int get_value(int lo, int hi)
-	// {
-	// 	get_value(0, lo, hi, 0);
-	// }
+	}
+
+	int get_value(int lo, int hi)
+	{
+		get_value(0, lo, hi, 0);
+	}
 
 
 
@@ -166,8 +195,8 @@ struct SegmentTree {
 
 int main()
 {
-	vector<int> vec { 1, 3, 5, 7, 9 , 11, 13
-		// , 17, 19
+	vector<int> vec { 1,  3,  5,  7,  9, 11, 13
+		           , 17, 19, 23, 29
 	};
 
 	//int * seg_tree_pointer = 0;
@@ -176,12 +205,16 @@ int main()
 	//int start = 0, end = vec.size() - 1;
 	//constructSegmentTree(vec, start, end, seg_tree_pointer, 0);
 	SegmentTree segtree(vec);
-	// int v1 = segtree.get_value(0, 6);
-	// cout << "0-6: " << v1 << endl;
-	// int v2 = segtree.get_value(1, 3);
-	// cout << "1-3: " << v2 << endl;
-	// int v3 = segtree.get_value(2, 5);
-	// cout << "2-5: " << v3 << endl ;
+	int v1 = segtree.get_value(0, 6);
+	cout << "0-6: " << v1 << endl;
+	int v2 = segtree.get_value(1, 3);
+	cout << "1-3: " << v2 << endl;
+	int v3 = segtree.get_value(2, 5);
+	cout << "2-5: " << v3 << endl ;
+	int v4 = segtree.get_value(3, 6);
+	cout << "3-6: " << v4 << endl ;
+	int v5 = segtree.get_value(4, 7);
+	cout << "4-7: " << v5 << endl ;
 }
 
 
