@@ -97,6 +97,7 @@ struct SegmentTree {
 		constructSegmentTree(arr, 0, arr.size()-1, 0);
 	}
 
+	// this is a private api 
 	int get_value(int seg_tree_index, int lo, int hi, int nest_level)
 	{
 		string fn_name = __PRETTY_FUNCTION__ ;
@@ -170,9 +171,75 @@ struct SegmentTree {
 
 	}
 
+	// this is a public api 
 	int get_value(int lo, int hi)
 	{
 		get_value(0, lo, hi, 0);
+	}
+
+	void update(int st_index, int start, int end, int value)
+	{
+		if (seg_tree_pointer[st_index]->left == 
+				seg_tree_pointer[st_index]->right) {
+			seg_tree_pointer[st_index]->value = value;
+			return;
+		}
+
+		int mid = (seg_tree_pointer[st_index]->left +
+			seg_tree_pointer[st_index]->right)/2,
+		    	left = 2 * st_index + 1,
+			right = 2* st_index + 2;
+
+		if (end <= mid) {
+			// start, end lies entirely in left half
+			cout << "update lies in left half: "
+				<< seg_tree_pointer[st_index]->left
+				<< " - "
+				<< seg_tree_pointer[st_index]->right
+				<< endl;
+			update(left, start, end, value);
+		} else if (start >= mid + 1) {
+			// start, end lies entirely in right half
+			cout << "update lies in right half: "
+				<< seg_tree_pointer[st_index]->left
+				<< " - "
+				<< seg_tree_pointer[st_index]->right
+				<< endl;
+			update(right, start, end, value);
+		} else {
+			update(left, start, mid, value);
+			update(right, mid+1, end, value);
+		}
+		seg_tree_pointer[st_index]->value = 
+			seg_tree_pointer[left]->value +
+			seg_tree_pointer[right]->value;
+
+	}
+
+	void print(int st_index)
+	{
+		string fn_name = __PRETTY_FUNCTION__ ;
+		//cout << "ENTER " << fn_name
+		//	<< " left: " << seg_tree_pointer[st_index]->left
+		//	<< " right: " << seg_tree_pointer[st_index]->right 
+		//	<< endl;
+			
+		// leaf node
+		if (seg_tree_pointer[st_index]->left == 
+				seg_tree_pointer[st_index]->right) {
+			cout << " " << seg_tree_pointer[st_index]->value;
+		} else {
+			// non-leaf node will have left and right
+			if (st_index < seg_tree_pointer.size()) {
+				int left = 2 * st_index+1,
+				    right = 2 * st_index + 2;
+				print (left);
+				print (right);
+				cout << " :"
+					<< seg_tree_pointer[st_index]->value
+					<< ": ";
+			}
+		}
 	}
 
 
@@ -215,6 +282,11 @@ int main()
 	cout << "3-6: " << v4 << endl ;
 	int v5 = segtree.get_value(4, 7);
 	cout << "4-7: " << v5 << endl ;
+	segtree.print(0);
+	cout << endl;
+	segtree.update(0, 1, 3, 10);
+	segtree.print(0);
+	cout << endl;
 }
 
 
